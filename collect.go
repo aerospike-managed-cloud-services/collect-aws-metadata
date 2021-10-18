@@ -121,7 +121,7 @@ func main() {
     PrintInfo(counted)
 
     now := time.Now().Format("20060102150405Z")
-    pth := fmt.Sprintf("%s/collect-aws-metadata.%s.%d", *textfiles_path, now, os.Getpid())
+    pth := fmt.Sprintf("%s/collect-aws-metadata.%s.%d.prom", *textfiles_path, now, os.Getpid())
     openFile, errOpen := os.Create(pth)
     check(errOpen)
 
