@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+if [[ "$#" -gt 0 ]]; then
+    blobname="$1"
+else
+    blobname="empty"
+fi
+
+fmt="%a, %d %b %Y %H:%M:%S %Z"
+now=$(date +"$fmt")
+event_begin=$(date -d "24 hours" +"$fmt")
+event_end=$(date -d "48 hours" +"$fmt")
+event_id=$(echo $RANDOM | md5sum | awk '{print $1}')
+
+template='HTTP/1.1 200 OK
+Content-Type: text/plain
+Accept-Ranges: none
+Last-Modified: $now
+Content-Length: 6
+Date: $now
+Server: EC2ws
+Connection: close
+$json'
+
+empty="[]"
+one_event="[
+  {
+    \"NotBefore\" : \"$event_begin\",
+    \"Code\" : \"system-reboot\",
+    \"Description\" : \"scheduled reboot\",
+    \"EventId\" : \"instance-event-$event_id\",
+    \"NotAfter\" : \"$event_end\",
+    \"State\" : \"active\"
+  }
+]"
+
+
+format_response() {
+    json="$(eval echo \"\$$blobname\")"
+
+    export json now
+    envsubst <<< $template
+}
+
+run_nc() {
+    tmp=$tempdir/mock-metadata-response
+    echo "$(format_response)"$'\n' > $tmp
+    while true; do
+        nc -l -p 80 -N -C < $tmp
+    done
+}
+
+tempdir="$(mktemp -d)"
+trap 'rm -rf -- "$tempdir"' EXIT
+
+
+run_nc
