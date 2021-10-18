@@ -1,7 +1,7 @@
 """
 AWS metadata HTTP service
 
-Returns only the /events/maintenance/scheduled endpoint
+Returns only a few specific endpoints (maintenance events and instance-id)
 """
 
 from datetime import datetime, timedelta
