@@ -1,3 +1,4 @@
 collect-aws-metadata
 *.pyc
 /venv/
+/cover.out
