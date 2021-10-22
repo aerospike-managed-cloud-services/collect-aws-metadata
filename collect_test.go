@@ -75,13 +75,13 @@ func Test_printInfo(t *testing.T) {
 			ret := printInfo(tt.args.msg)
 			rx := regexp.MustCompile(tt.want)
 			if rx.FindStringIndex(ret) == nil {
-				t.Errorf(`PrintInfo(%s) ! match %s`, tt.args.msg, tt.want)
+				t.Errorf(`printInfo(%s) ! match %s`, tt.args.msg, tt.want)
 			}
 		})
 	}
 }
 
-// func TestWriteMetrics(t *testing.T) {
+// func Test_writeMetrics(t *testing.T) {
 // 	type args struct {
 // 		output   *os.File
 // 		metadata *fetched_metadata
@@ -97,19 +97,19 @@ func Test_printInfo(t *testing.T) {
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := WriteMetrics(tt.args.output, tt.args.metadata, tt.args.prefix)
+// 			got, err := writeMetrics(tt.args.output, tt.args.metadata, tt.args.prefix)
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("WriteMetrics() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("writeMetrics() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
 // 			if got != tt.want {
-// 				t.Errorf("WriteMetrics() = %v, want %v", got, tt.want)
+// 				t.Errorf("writeMetrics() = %v, want %v", got, tt.want)
 // 			}
 // 		})
 // 	}
 // }
 //
-// func TestFetchURL(t *testing.T) {
+// func Test_fetchURL(t *testing.T) {
 // 	type args struct {
 // 		url string
 // 	}
@@ -123,19 +123,19 @@ func Test_printInfo(t *testing.T) {
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := FetchURL(tt.args.url)
+// 			got, err := fetchURL(tt.args.url)
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("FetchURL() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("fetchURL() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
 // 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("FetchURL() = %v, want %v", got, tt.want)
+// 				t.Errorf("fetchURL() = %v, want %v", got, tt.want)
 // 			}
 // 		})
 // 	}
 // }
 //
-// func TestFetchMetadata(t *testing.T) {
+// func Test_fetchMetadata(t *testing.T) {
 // 	type args struct {
 // 		opt *collect_options
 // 	}
@@ -149,19 +149,19 @@ func Test_printInfo(t *testing.T) {
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := FetchMetadata(tt.args.opt)
+// 			got, err := fetchMetadata(tt.args.opt)
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("FetchMetadata() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("fetchMetadata() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
 // 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("FetchMetadata() = %v, want %v", got, tt.want)
+// 				t.Errorf("fetchMetadata() = %v, want %v", got, tt.want)
 // 			}
 // 		})
 // 	}
 // }
 //
-// func TestParseArgs(t *testing.T) {
+// func Test_parseArgs(t *testing.T) {
 // 	tests := []struct {
 // 		name    string
 // 		want    *collect_options
@@ -171,13 +171,13 @@ func Test_printInfo(t *testing.T) {
 // 	}
 // 	for _, tt := range tests {
 // 		t.Run(tt.name, func(t *testing.T) {
-// 			got, err := ParseArgs()
+// 			got, err := parseArgs()
 // 			if (err != nil) != tt.wantErr {
-// 				t.Errorf("ParseArgs() error = %v, wantErr %v", err, tt.wantErr)
+// 				t.Errorf("parseArgs() error = %v, wantErr %v", err, tt.wantErr)
 // 				return
 // 			}
 // 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("ParseArgs() = %v, want %v", got, tt.want)
+// 				t.Errorf("parseArgs() = %v, want %v", got, tt.want)
 // 			}
 // 		})
 // 	}

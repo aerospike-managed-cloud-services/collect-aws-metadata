@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -27,7 +26,7 @@ func check(e error) {
 	}
 }
 
-// uses log.Printf to write an info message using a standard format
+// uses log.Println to write an info message using a standard format
 func printInfo(msg string) string {
 	ret := MY_PROGRAM_NAME + ": " + msg
 	log.Println(ret)
@@ -35,54 +34,49 @@ func printInfo(msg string) string {
 }
 
 // create a textfile for Prometheus to read from the events, using the output argument (an open file)
-func writeMetrics(output *os.File, metadata *fetched_metadata, prefix string) (int, error) {
-	lines := 0
-
-	_, errFprintf := fmt.Fprintf(output,
+func writeMetrics(output *os.File, metadata *fetched_metadata, prefix string) error {
+	_, err := fmt.Fprintf(output,
 		"aws_maintenance_event_count{instance=\"%s\"} %d\n",
 		metadata.instanceID,
 		len(metadata.events),
 	)
-	if errFprintf != nil {
-		return lines, errFprintf
+	if err != nil {
+		return err
 	}
-	lines = lines + 1
 
 	for _, ev := range metadata.events {
-		evTime, errParse := time.Parse("02 Jan 2006 15:04:05 UTC", ev.NotBefore)
-		if errParse != nil {
-			return lines, errParse
-
+		evTime, err := time.Parse("02 Jan 2006 15:04:05 UTC", ev.NotBefore)
+		if err != nil {
+			return err
 		}
-		_, errFprintf2 := fmt.Fprintf(output,
+		_, err = fmt.Fprintf(output,
 			"aws_maintenance_event{instance=\"%s\", code=\"%s\", id=\"%s\"} %d\n",
 			metadata.instanceID,
 			ev.Code,
 			ev.EventId,
 			evTime.Unix(),
 		)
-		if errFprintf2 != nil {
-			return lines, errFprintf2
+		if err != nil {
+			return err
 		}
-		lines = lines + 1
 	}
-	return lines, nil
+	return nil
 }
 
 // fetch `url` with HTTP GET and return the body
 func fetchURL(url string) ([]byte, error) {
-	resp, errGet := http.Get(url)
-	if errGet != nil {
-		return nil, errGet
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
 
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
 
-	body, errRead := ioutil.ReadAll(resp.Body)
-	if errRead != nil {
-		return nil, errRead
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
 	}
 
 	return body, nil
@@ -94,21 +88,21 @@ func fetchMetadata(opt *collect_options) (*fetched_metadata, error) {
 	eventsURL := opt.baseURL + DEFAULT_SCHEDULED_PATH
 	instanceURL := opt.baseURL + DEFAULT_INSTANCE_ID_PATH
 
-	instance, errFetch1 := fetchURL(instanceURL)
-	if errFetch1 != nil {
-		return nil, errFetch1
+	instance, err := fetchURL(instanceURL)
+	if err != nil {
+		return nil, err
 	}
 
-	ret.instanceID = string(instance[:])
+	ret.instanceID = string(instance)
 
-	body, errFetch2 := fetchURL(eventsURL)
-	if errFetch2 != nil {
-		return nil, errFetch2
+	body, err := fetchURL(eventsURL)
+	if err != nil {
+		return nil, err
 	}
 
-	errJSON := json.Unmarshal(body, &ret.events)
-	if errJSON != nil {
-		return nil, errJSON
+	err = json.Unmarshal(body, &ret.events)
+	if err != nil {
+		return nil, err
 	}
 	counted := fmt.Sprintf("Fetched %s; %d events", eventsURL, len(ret.events))
 	printInfo(counted)
@@ -132,6 +126,14 @@ type maintenance_event struct {
 type fetched_metadata struct {
 	instanceID string
 	events     []maintenance_event
+}
+
+type FlagError struct {
+	message string
+}
+
+func (e *FlagError) Error() string {
+	return e.message
 }
 
 func parseArgs() (*collect_options, error) {
@@ -159,26 +161,25 @@ func parseArgs() (*collect_options, error) {
 	}
 
 	if len(ret.textfilesPath) == 0 {
-		return ret, errors.New("Required: --textfiles-path")
+		return ret, &FlagError{"Required: --textfiles-path"}
 	}
 
 	return ret, nil
 }
 
 func main() {
-	opt, parseErr := parseArgs()
-	check(parseErr)
+	opt, err := parseArgs()
+	check(err)
 
-	fetchedMetadata, fetchErr := fetchMetadata(opt)
-	check(fetchErr)
+	fetchedMetadata, err := fetchMetadata(opt)
+	check(err)
 
-	now := time.Now().Format("20060102150405Z")
-	pth := fmt.Sprintf("%s/collect-aws-metadata.%s.%d.prom", opt.textfilesPath, now, os.Getpid())
-	openFile, errOpen := os.Create(pth)
-	check(errOpen)
+	pth := fmt.Sprintf("%s/collect-aws-metadata.prom", opt.textfilesPath)
+	openFile, err := os.Create(pth)
+	check(err)
 
-	_, errWrite := writeMetrics(openFile, fetchedMetadata, opt.metricPrefix)
-	check(errWrite)
+	err = writeMetrics(openFile, fetchedMetadata, opt.metricPrefix)
+	check(err)
 
 	openFile.Close()
 

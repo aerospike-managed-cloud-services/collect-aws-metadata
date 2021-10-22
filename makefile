@@ -5,6 +5,9 @@ SHELL := /usr/bin/bash
 .PHONY: clean mock-service run-test test
 
 
+all: collect-aws-metadata
+
+
 clean:
 	rm -f collect-aws-metadata
 
