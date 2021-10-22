@@ -36,7 +36,8 @@ func printInfo(msg string) string {
 // create a textfile for Prometheus to read from the events, using the output argument (an open file)
 func writeMetrics(output *os.File, metadata *fetched_metadata, prefix string) error {
 	_, err := fmt.Fprintf(output,
-		"aws_maintenance_event_count{instance=\"%s\"} %d\n",
+		"%saws_maintenance_event_count{instance=\"%s\"} %d\n",
+		prefix,
 		metadata.instanceID,
 		len(metadata.events),
 	)
@@ -50,7 +51,8 @@ func writeMetrics(output *os.File, metadata *fetched_metadata, prefix string) er
 			return err
 		}
 		_, err = fmt.Fprintf(output,
-			"aws_maintenance_event{instance=\"%s\", code=\"%s\", id=\"%s\"} %d\n",
+			"%saws_maintenance_event{instance=\"%s\", code=\"%s\", id=\"%s\"} %d\n",
+			prefix,
 			metadata.instanceID,
 			ev.Code,
 			ev.EventId,

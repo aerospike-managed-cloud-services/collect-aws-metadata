@@ -26,6 +26,7 @@ collect-aws-metadata: collect.go go.mod
 run-test: collect.go go.mod
 	go run . \
 		--base-url http://localhost:8000 \
+		--metric-prefix amcs_ \
 		--textfiles-path=/tmp/collect-aws
 
 
