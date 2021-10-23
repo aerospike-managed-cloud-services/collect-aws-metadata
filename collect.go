@@ -138,39 +138,40 @@ func (e *FlagError) Error() string {
 	return e.message
 }
 
-func parseArgs() (*collect_options, error) {
-	baseURL := flag.String(
+func parseArgs(args []string) (*collect_options, error) {
+	flagSet := flag.NewFlagSet(MY_PROGRAM_NAME, flag.ContinueOnError)
+
+	var ret collect_options
+
+	flagSet.StringVar(
+		&ret.baseURL,
 		"base-url",
 		DEFAULT_BASE_URL,
 		"HTTP URL for the meta-data service (e.g. 'http://169.254.169.254')",
 	)
-	metricPrefix := flag.String(
+	flagSet.StringVar(
+		&ret.metricPrefix,
 		"metric-prefix",
 		"",
 		"Prometheus metric names will be given this prefix",
 	)
-	textfilesPath := flag.String(
+	flagSet.StringVar(
+		&ret.textfilesPath,
 		"textfiles-path",
 		"",
 		"(required) path to a directory of Prometheus metric textfiles, i.e. one being read by node_exporter",
 	)
-	flag.Parse()
-
-	ret := &collect_options{
-		baseURL:       *baseURL,
-		metricPrefix:  *metricPrefix,
-		textfilesPath: *textfilesPath,
-	}
+	flagSet.Parse(args)
 
 	if len(ret.textfilesPath) == 0 {
-		return ret, &FlagError{"Required: --textfiles-path"}
+		return &ret, &FlagError{"Required: --textfiles-path"}
 	}
 
-	return ret, nil
+	return &ret, nil
 }
 
 func main() {
-	opt, err := parseArgs()
+	opt, err := parseArgs(os.Args[1:])
 	check(err)
 
 	fetchedMetadata, err := fetchMetadata(opt)
