@@ -42,7 +42,7 @@ class Event(BaseModel):
 app = FastAPI()
 
 
-@app.get("/1.0/latest/meta-data/events/maintenance/scheduled", response_class=PlainTextResponse)
+@app.get("/latest/meta-data/events/maintenance/scheduled", response_class=PlainTextResponse)
 async def scheduled():
     """
     Simulate some scheduled events
