@@ -14,9 +14,15 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 
-in24h = lambda: (datetime.now() + timedelta(hours=24)).astimezone()
-in48h = lambda: (datetime.now() + timedelta(hours=48)).astimezone()
-FMT = "%d %b %Y %H:%M:%S %Z"
+# time window from 10 days out to 11 days out; UTC representation
+in240h = lambda: (datetime.now() + timedelta(hours=240)).astimezone()
+in264h = lambda: (datetime.now() + timedelta(hours=264)).astimezone()
+
+# AWS does not zero-pad the day-of-month but does pad the other numbers (sigh)
+# Also, AWS uses "GMT" which does not mean the same thing as UTC. We're
+# going to assume they're actually the same time, though, and just print "GMT" at the end.
+FMT = "%-d %b %Y %H:%M:%S GMT"
+
 INSTANCE_ID = 'i-0da06b32c373fdecz'
 
 
@@ -33,8 +39,8 @@ class Event(BaseModel):
     """
     Code: str = "system-reboot"
     Description: str = "scheduled reboot"
-    NotBefore: str = Field(default_factory=lambda: in24h().strftime(FMT))
-    NotAfter: str = Field(default_factory=lambda: in48h().strftime(FMT))
+    NotBefore: str = Field(default_factory=lambda: in240h().strftime(FMT))
+    NotAfter: str = Field(default_factory=lambda: in264h().strftime(FMT))
     EventId: str = Field(default_factory=lambda: f"instance-event-{pwd()}")
     State: str = "active"
 

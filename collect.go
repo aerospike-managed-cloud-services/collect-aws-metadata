@@ -12,7 +12,7 @@ import (
 )
 
 const DEFAULT_BASE_URL = "http://169.254.169.254"
-const DEFAULT_SCHEDULED_PATH = "/1.0/latest/meta-data/events/maintenance/scheduled"
+const DEFAULT_SCHEDULED_PATH = "/latest/meta-data/events/maintenance/scheduled"
 const DEFAULT_INSTANCE_ID_PATH = "/1.0/meta-data/instance-id"
 const MY_PROGRAM_NAME = "collect-aws-metadata"
 
@@ -46,7 +46,7 @@ func writeMetrics(output *os.File, metadata *fetched_metadata, prefix string) er
 	}
 
 	for _, ev := range metadata.events {
-		evTime, err := time.Parse("02 Jan 2006 15:04:05 UTC", ev.NotBefore)
+		evTime, err := time.Parse("2 Jan 2006 15:04:05 GMT", ev.NotBefore)
 		if err != nil {
 			return err
 		}
