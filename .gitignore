@@ -1,4 +1,6 @@
 collect-aws-metadata
 *.pyc
 /venv/
-/cover.out
+coverage.out
+coverage.html
+go.sum
