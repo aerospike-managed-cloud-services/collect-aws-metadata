@@ -2,7 +2,7 @@
 
 SHELL := /usr/bin/bash
 
-.PHONY: clean mock-service run-test test
+.PHONY: clean mock-service run-test test deps-test
 
 
 all: collect-aws-metadata
@@ -29,12 +29,14 @@ run-test: collect.go go.mod
 		--metric-prefix=amcs_ \
 		--textfiles-path=/tmp/collect-aws
 
+deps-test:
+	go install github.com/dave/courtney
 
-test:
+test: deps-test
 	# go test -v -coverprofile cover.out .
 	courtney .
 	go tool cover -func coverage.out
 	go tool cover -html coverage.out -o coverage.html
 
-test-100pct:
+test-100pct: deps-test
 	courtney -e .
