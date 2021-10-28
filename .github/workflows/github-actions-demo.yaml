@@ -17,12 +17,12 @@ jobs:
       ## - name: Setup Debug Session
       ##   uses: csexton/debugger-action@master
       
-      ## - name: "Test"
-      ##   run: make test
-      ##   # run: make test-100pct
+      - name: "Test"
+        run: make test
+        # run: make test-100pct
 
-      ## - name: "Build"
-      ##   run: make
+      - name: "Build"
+        run: make
 
       ## - name: "Artifact"
       ##   uses: actions/upload-artifact@v2
