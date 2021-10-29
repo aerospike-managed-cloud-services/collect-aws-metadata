@@ -18,6 +18,8 @@ import (
 )
 
 // create & return a replacement for Fatalf that collects calls to Fatalf
+//
+// in-param *[]errs will be the strings we called Fatalf with
 func genFakeFatalf(errs *[]string) func(f string, args ...interface{}) {
 	return func(format string, args ...interface{}) {
 		if len(args) > 0 {
@@ -48,6 +50,7 @@ func Test_check(t *testing.T) {
 	}
 
 	// schedule logFatalf to be reset after the test is finished
+	// (logFatalf is an alias in collect.go specifically so the test can shadow it)
 	origLogFatalf := logFatalf
 	defer func() { logFatalf = origLogFatalf }()
 
@@ -204,6 +207,13 @@ func Test_fetchURL(t *testing.T) {
 
 type writerFunc func(w http.ResponseWriter)
 
+// create an httptest server with one handler that stands in for the AWS metadata service.
+//
+// Required parameters are two functions of type writerFunc:
+// - fnID handles test calls to /1.0/meta-data/instance-id
+// - fnJSON handles test calls to /latest/meta-data/events/maintenance/scheduled
+//
+// Returns the server with these handlers bound to write responses
 func helpMakeAServer(fnID writerFunc, fnJSON writerFunc) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {

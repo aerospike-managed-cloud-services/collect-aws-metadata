@@ -1,6 +1,14 @@
+# editor cruft
+*.code-workspace
+
+# executable object
 collect-aws-metadata
-*.pyc
-/venv/
+
+# testing
 coverage.out
 coverage.html
 go.sum
+
+# python cruft
+*.pyc
+/venv/
