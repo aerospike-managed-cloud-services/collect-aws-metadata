@@ -33,7 +33,6 @@ deps-test:
 	go install github.com/dave/courtney
 
 test: deps-test
-	# go test -v -coverprofile cover.out .
 	courtney .
 	go tool cover -func coverage.out
 	go tool cover -html coverage.out -o coverage.html
