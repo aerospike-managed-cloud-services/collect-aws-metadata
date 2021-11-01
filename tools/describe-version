@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# print a version string that's useful to us by examining github tags
+
+set -euo pipefail
+IFS=$'\n\t'
+
+tagmatch=(--match 'v*' --match 'v*.*' --match 'v*.*.*')
+
+git-describe() {
+    git describe --tags --abbrev=0 ${tagmatch[@]} "$@" 2>/dev/null
+}
+
+exact="$(git-describe --exact-match || true)"
+if [[ "$exact" == "" ]]; then
+    version="$(git-describe)~unreleased"
+else
+    version="$exact"
+fi
+
+echo "$version"

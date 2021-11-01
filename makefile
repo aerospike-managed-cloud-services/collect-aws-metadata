@@ -3,6 +3,7 @@
 SHELL := /usr/bin/bash
 
 .PHONY: clean mock-service run-test test deps-test
+VERSION := $(shell tools/describe-version)
 
 
 all: collect-aws-metadata
@@ -20,7 +21,7 @@ mock-service:
 
 
 collect-aws-metadata: collect.go go.mod
-	go build
+	go build --ldflags="-X main.VERSION=$(VERSION)"
 
 
 run-test: collect.go go.mod
