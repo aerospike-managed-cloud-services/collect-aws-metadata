@@ -37,7 +37,6 @@ test: deps-test
 	courtney .
 	go tool cover -func coverage.out
 	go tool cover -html coverage.out -o coverage.html
-	# intentionally fail test just to see what GHA does
 
 test-100pct: deps-test
 	courtney -e .

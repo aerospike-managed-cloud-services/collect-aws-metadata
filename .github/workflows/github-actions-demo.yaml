@@ -18,8 +18,7 @@ jobs:
       ##   uses: csexton/debugger-action@master
       
       - name: "Test"
-        run: make test
-        # run: make test-100pct
+        run: make test-100pct
 
       - name: "Build"
         run: make
