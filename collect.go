@@ -20,8 +20,9 @@ const MY_PROGRAM_NAME = "collect-aws-metadata"
 
 var VERSION string // to set this, build with --ldflags="-X main.VERSION=vx.y.z"
 
-// make Fatalf replaceable in a test
-var logFatalf = log.Fatalf
+// make these replaceable in a test
+var logFatalf func(format string, v ...interface{}) = log.Fatalf
+var osExit func(code int) = os.Exit
 
 type collect_options struct {
 	baseURL, metricPrefix, textfilesPath string
@@ -196,9 +197,10 @@ func main() {
 		if VERSION == "" {
 			fmt.Printf("%s %s\n", MY_PROGRAM_NAME, "undefined")
 		} else {
-			fmt.Printf("%s %s\n", MY_PROGRAM_NAME, VERSION)
+			fmt.Printf("%s %s\n", MY_PROGRAM_NAME, VERSION) // notest
 		}
-		os.Exit(0)
+		osExit(0)
+		return // reachable in a test
 	}
 	check(err)
 
