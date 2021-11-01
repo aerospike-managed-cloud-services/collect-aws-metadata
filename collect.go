@@ -18,6 +18,8 @@ const DEFAULT_SCHEDULED_PATH = "/latest/meta-data/events/maintenance/scheduled"
 const DEFAULT_INSTANCE_ID_PATH = "/1.0/meta-data/instance-id"
 const MY_PROGRAM_NAME = "collect-aws-metadata"
 
+var VERSION string // to set this, build with --ldflags="-X main.VERSION=vx.y.z"
+
 // make Fatalf replaceable in a test
 var logFatalf = log.Fatalf
 
@@ -50,6 +52,7 @@ func (e *HTTPErrorStatusCode) Error() string {
 }
 
 var errMissingTextfilesPath = errors.New("required: --textfiles-path")
+var errShowVersion = errors.New("(not an error) --version override")
 
 // test `e`, write a message using the standard error format (and exit) if it is an error
 func check(e error) {
@@ -151,6 +154,11 @@ func parseArgs(args []string) (*collect_options, error) {
 
 	var ret collect_options
 
+	showVersion := flagSet.Bool(
+		"version",
+		false,
+		"Show the version of the app",
+	)
 	flagSet.StringVar(
 		&ret.baseURL,
 		"base-url",
@@ -171,6 +179,10 @@ func parseArgs(args []string) (*collect_options, error) {
 	)
 	flagSet.Parse(args)
 
+	if *showVersion {
+		return &ret, errShowVersion
+	}
+
 	if len(ret.textfilesPath) == 0 {
 		return &ret, errMissingTextfilesPath
 	}
@@ -180,6 +192,14 @@ func parseArgs(args []string) (*collect_options, error) {
 
 func main() {
 	opt, err := parseArgs(os.Args[1:])
+	if errors.Is(err, errShowVersion) {
+		if VERSION == "" {
+			fmt.Printf("%s %s\n", MY_PROGRAM_NAME, "undefined")
+		} else {
+			fmt.Printf("%s %s\n", MY_PROGRAM_NAME, VERSION)
+		}
+		os.Exit(0)
+	}
 	check(err)
 
 	fetchedMetadata, err := fetchMetadata(opt)

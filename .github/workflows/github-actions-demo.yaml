@@ -8,6 +8,8 @@ jobs:
 
       - name: Check out repository code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # all branches and tags; needed for version string
 
       - name: "Setup Go"
         uses: actions/setup-go@v2
@@ -18,12 +20,20 @@ jobs:
         run: make test-100pct
 
       - name: "Build"
-        run: make
+        run: make tarball
+
+      - name: "Describe version"
+        run: |
+          echo "release_version=$(tools/describe-version)" | tee -a $GITHUB_ENV
 
       - name: "Artifact"
         uses: actions/upload-artifact@v2
         with:
-          name: collect-aws-metadata
-          path: ./collect-aws-metadata
+          name: collect-aws-metadata-${{ env.release_version }}.tar.gz
+          path: ./collect-aws-metadata-${{ env.release_version }}.tar.gz
 
-      # - name: "tag release"
+
+  ## release:
+  ##   runs-on: ubuntu-latest
+  ##   steps:
+  ##     - name: "tag release"

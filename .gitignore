@@ -3,6 +3,7 @@
 
 # executable object
 collect-aws-metadata
+collect-aws-metadata-*.tar.gz
 
 # testing
 coverage.out
