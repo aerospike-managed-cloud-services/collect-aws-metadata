@@ -7,7 +7,6 @@ collect-aws-metadata
 # testing
 coverage.out
 coverage.html
-go.sum
 
 # python cruft
 *.pyc
