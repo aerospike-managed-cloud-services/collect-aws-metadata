@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# create a github release with the gh tool
+
+set -euo pipefail
+IFS=$'\n\t'
+
+ver="$1"
+tarball="collect-aws-metadata-$ver.tar.gz"
+
+ls -l $tarball
+
+gh release create -t "Release $ver" -n "## Release $ver"$'\n'"- Hello, world" "$ver"  "$tarball"

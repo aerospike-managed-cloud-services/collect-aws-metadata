@@ -28,5 +28,5 @@ jobs:
       - name: Package release
         run: make tarball
 
-      - name: Upload release
-        run: echo Releasing ${{ steps.check_release_conditions.outputs.release_version }}
+      - name: Create GitHub release with gh
+        run: tools/release ${{ steps.check_release_conditions.outputs.release_version }}
