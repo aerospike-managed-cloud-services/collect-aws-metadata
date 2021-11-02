@@ -9,7 +9,5 @@ ver="$1"
 token="$2"
 tarball="collect-aws-metadata-$ver.tar.gz"
 
-ls -l $tarball
-
 gh auth login --with-token <<< "$token"
 gh release create -t "Release $ver" -n "## Release $ver"$'\n'"- Hello, world" "$ver"  "$tarball"
