@@ -13,7 +13,7 @@ git-describe() {
 
 exact="$(git-describe --exact-match || true)"
 if [[ "$exact" == "" ]]; then
-    version="$(git-describe)~unreleased"
+    version="$(git-describe)~wip"
 else
     version="$exact"
 fi
