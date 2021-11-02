@@ -9,6 +9,10 @@ jobs:
         with:
           fetch-depth: 0  # all branches and tags; needed for version string
 
+      - name: Print the describe-version
+        run: |
+          echo "::debug::output of describe-version for this branch: $(tools/describe-version)"
+
       - name: Check release conditions
         id: check_release_conditions
         run: |
@@ -25,4 +29,4 @@ jobs:
         run: make tarball
 
       - name: Upload release
-        run: Releasing ${{ steps.check_release_conditions.outputs.release_version }}
+        run: echo Releasing ${{ steps.check_release_conditions.outputs.release_version }}
