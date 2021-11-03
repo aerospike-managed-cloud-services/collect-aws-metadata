@@ -47,7 +47,7 @@ In addition:
 
 - TBD: update docs
 
-- Finish up by merging your `-rc` branch into `develop`, and merging `develop` into `main`.
+- Finish up by merging your `-rc` branch into first `main` and then `develop`.
 
 
 ## Changelog
