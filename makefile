@@ -1,27 +1,31 @@
 #!/usr/bin/env make
 
-SHELL := /usr/bin/bash
+SHELL 	:= /usr/bin/bash
+PROG 	:= collect-aws-metadata
+VERSION := $(shell tools/describe-version)
+TARBALL := $(PROG)-$(VERSION).tar.gz
 
-.PHONY: clean mock-service run-test test deps-test
+.PHONY: clean mock-service run-test test deps-test tarball
 
 
-all: collect-aws-metadata
+all: $(PROG)
 
+$(PROG): collect.go go.mod go.sum
+	go build --ldflags="-X main.VERSION=$(VERSION)"
+
+$(TARBALL): $(PROG)
+	tar cfz $@ $^ && tar tvfz $@
+
+tarball: $(TARBALL)
 
 clean:
-	rm -f collect-aws-metadata
-
+	rm -f $(PROG) $(TARBALL)
 
 mock-service:
 	. $(VIRTUAL_ENV)/bin/activate && cd test \
 		&& uvicorn mock_metadata:app \
 			--header server:EC2ws \
 			--reload
-
-
-collect-aws-metadata: collect.go go.mod
-	go build
-
 
 run-test: collect.go go.mod
 	go run . \
@@ -33,7 +37,6 @@ deps-test:
 	go install github.com/dave/courtney
 
 test: deps-test
-	# go test -v -coverprofile cover.out .
 	courtney .
 	go tool cover -func coverage.out
 	go tool cover -html coverage.out -o coverage.html

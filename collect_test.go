@@ -30,6 +30,9 @@ func genFakeFatalf(errs *[]string) func(f string, args ...interface{}) {
 	}
 }
 
+// we don't care about calls to this, except to prevent exits
+func fakeOsExit(rc int) {}
+
 func Test_check(t *testing.T) {
 	type args struct {
 		e error
@@ -317,6 +320,12 @@ func Test_parseArgs(t *testing.T) {
 			wantErr: errMissingTextfilesPath,
 		},
 		{
+			name:    "--version should return an error flag",
+			args:    []string{"--version", "--metric-prefix=hello"}, // other flags are ignored
+			want:    nil,
+			wantErr: errShowVersion,
+		},
+		{
 			name: "options are set, default metricPrefix",
 			args: []string{"--textfiles-path", ".", "--base-url", "http://example.com"},
 			want: &collect_options{
@@ -360,40 +369,55 @@ func Test_main(t *testing.T) {
 		func(w http.ResponseWriter) { fmt.Fprintf(w, "[]") },
 	)
 
-	// capture output and schedule to restore it at the end of the test
-	origStdout := os.Stdout
-	origStderr := os.Stderr
-	defer func() { os.Stdout = origStdout; os.Stderr = origStderr }()
-	r1, w1, _ := os.Pipe()
-	log.SetOutput(w1) // capture log calls too
-	defer func() { log.SetOutput(origStdout) }()
-	os.Stdout = w1
-	os.Stderr = w1
-
 	tests := []struct {
 		name    string
 		cliArgs []string
 		want    string
 	}{
-		{name: "yes",
+		{name: "main",
 			cliArgs: []string{
 				"collect-aws-metadata",
 				"--textfiles-path=/tmp",
 				"--base-url=" + srv.URL,
 			},
 			want: `(?s)collect-aws-metadata: Fetched http.*\b0 events.*collect-aws-metadata: Wrote /tmp/`},
+		{name: "version",
+			cliArgs: []string{
+				"collect-aws-metadata",
+				"--version",
+			},
+			want: fmt.Sprintf("collect-aws-metadata %s", VERSION),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// capture output and schedule to restore it at the end of the test
+			origStdout := os.Stdout
+			origStderr := os.Stderr
+			defer func() { os.Stdout = origStdout; os.Stderr = origStderr }()
+			r1, w1, _ := os.Pipe()
+			log.SetOutput(w1) // capture log calls too
+			defer func() { log.SetOutput(origStdout) }()
+			os.Stdout = w1
+			os.Stderr = w1
+
 			os.Args = tt.cliArgs
+
+			// capture osExit and schedule to restore it at the end
+			osExit = fakeOsExit
+			origOsExit := osExit
+			defer func() { osExit = origOsExit }()
+
 			defer func() { os.Remove("/tmp/collect-aws-metadata.prom") }()
+
 			main()
+
 			w1.Close()
 			rx := regexp.MustCompile(tt.want)
 			got, _ := ioutil.ReadAll(r1)
 			trimmed := strings.TrimSpace(string(got))
 			if rx.FindStringIndex(trimmed) == nil {
-				t.Errorf("Program output was `%s` wanted `%s`", got, tt.want)
+				t.Errorf("Program output was `%s` wanted `%s`", trimmed, tt.want)
 			}
 		})
 	}
