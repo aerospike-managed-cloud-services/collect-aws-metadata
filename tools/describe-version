@@ -5,17 +5,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-tagmatch=(--match 'v*' --match 'v*.*' --match 'v*.*.*')
-
 git-describe() {
-    git describe --tags --abbrev=0 ${tagmatch[@]} "$@" 2>/dev/null
+    git describe --tags --abbrev=0 --match 'v*' "$@" 2>/dev/null
 }
 
-exact="$(git-describe --exact-match || true)"
-if [[ "$exact" == "" ]]; then
+version="$(git-describe --exact-match || true)"
+if [[ "$version" == "" ]]; then
     version="$(git-describe)~wip"
-else
-    version="$exact"
 fi
 
 echo "$version"
