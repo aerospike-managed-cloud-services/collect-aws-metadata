@@ -14,7 +14,71 @@ Reads AWS instance meta-data and creates a Prometheus .prom text file with upcom
 
 ## Integrate with prometheus and systemd
 
-- hello
+### Prometheus
+
+You will need the 
+[Prometheus node_exporter](https://github.com/prometheus/node_exporter) plugin
+installed and configured correctly.
+
+In particular, you must be sure that you are using this parameter:
+```
+--collector.textfile.directory
+```
+
+Whatever directory you have this set to will be needed by the systemd service config.
+
+### systemd
+
+You should create both a service and a timer for this tool.
+
+Set up a systemd *service* to find the binary and pass arguments to it.
+
+<details>
+<summary>systemd service file (also find this in <i>doc/samples</i>)</summary>
+
+```
+[Unit]
+Description=Collect AWS maintenance events
+Wants=collect-aws-metadata.timer
+After=collect-aws-metadata.timer
+
+[Service]
+ExecStart=/opt/my_deployment/bin/collect-aws-metadata --textfiles-path=/opt/node_exporter/textfile_collector/ --metric-prefix=my_org_
+
+User=prometheus
+Group=nodeexporter
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
+```
+
+</details>
+
+Set up a system *timer* to run the service on a timed schedule.
+
+<details>
+<summary>systemd timer file (also find this in <i>doc/samples</i>)</summary>
+
+```
+[Unit]
+Description=Collect AWS maintenance events timer
+Requires=collect-aws-metadata.service
+After=network-online.target
+
+[Timer]
+Unit=collect-aws-metadata.service
+# every 5 minutes
+OnCalendar=*:0/5
+
+Persistent=true
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target
+```
+
+</details>
 
 
 ## Maintainer section: releasing
