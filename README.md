@@ -3,19 +3,22 @@ Reads AWS instance meta-data and creates a Prometheus .prom text file with upcom
 
 ## Installation
 
-- Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z.tar.gz`
+1. Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z.tar.gz`
 
-- Unpack
+1. Unpack
 
     ```
     tar xvfz collect-aws-metadata-v*.tar.gz
     ```
 
-- Copy `./collect-aws-metadata` to somewhere in your PATH
+1. Copy `./collect-aws-metadata` to somewhere in your PATH
 
 ## Integrate with prometheus and systemd
 
-### Prometheus
+To be effective, this tool must be run by systemd to output to a Prometheus
+node_exporter textfiles directory.
+
+#### Prometheus
 
 You will need the 
 [Prometheus node_exporter](https://github.com/prometheus/node_exporter) plugin
@@ -28,14 +31,14 @@ In particular, you must be sure that you are using this parameter:
 
 Whatever directory you have this set to will be needed by the systemd service config.
 
-### systemd
+#### systemd
 
 You should create both a service and a timer for this tool.
 
 Set up a systemd *service* to find the binary and pass arguments to it.
 
 <details>
-<summary>systemd service file (also find this in <i>doc/samples</i>)</summary>
+<summary>systemd service file (also find this in <i>doc/sample</i>)</summary>
 
 ```
 [Unit]
@@ -59,7 +62,7 @@ WantedBy=multi-user.target
 Set up a system *timer* to run the service on a timed schedule.
 
 <details>
-<summary>systemd timer file (also find this in <i>doc/samples</i>)</summary>
+<summary>systemd timer file (also find this in <i>doc/sample</i>)</summary>
 
 ```
 [Unit]
@@ -88,7 +91,7 @@ WantedBy=timers.target
 
 To cut a release of this software, automated tests must pass. Check under `Actions` for the latest commit.
 
-### Create an RC branch and test
+#### Create an RC branch and test
 
 - We use the Gitflow process. For a release, this means that you should have a v1.2.3-rc branch under your 
   develop branch. Like this:
@@ -106,6 +109,8 @@ To cut a release of this software, automated tests must pass. Check under `Actio
 
 - Perform whatever tests are necessary.
 
+#### Tag and cut the release with Github Actions
+
 - Once you have tested in this branch, create a tag in the v1.2.3-rc branch:
   ```
   git tag -a -m v1.2.3 v1.2.3
@@ -122,6 +127,8 @@ To cut a release of this software, automated tests must pass. Check under `Actio
 
 - Edit the release on that page 
 
+#### Merge up
+
 - Finish up by merging your `-rc` branch into 
   1. `main` and then 
   2. `develop`.
@@ -136,6 +143,12 @@ Versioning].
 </details>
 
 
+### [1.0.0] - 2021-12-01
+
+#### Changed
+
+- This repo is now public.
+
 ### [0.9.0] - 2021-12-01
 
 #### Added
@@ -146,6 +159,7 @@ Versioning].
 
 
 [Unreleased]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.9.0...HEAD
+[1.0.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.0...v0.9.0
 [0.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/releases/tag/v0.0
 
