@@ -1,0 +1,14 @@
+[Unit]
+Description=Collect AWS maintenance events
+Wants=collect-aws-metadata.timer
+After=collect-aws-metadata.timer
+
+[Service]
+ExecStart=/opt/my_deployment/bin/collect-aws-metadata --textfiles-path=/opt/node_exporter/textfile_collector/ --metric-prefix=my_org_
+
+User=prometheus
+Group=nodeexporter
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
