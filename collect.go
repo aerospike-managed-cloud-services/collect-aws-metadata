@@ -30,11 +30,11 @@ type collect_options struct {
 
 type maintenance_event struct {
 	NotBefore   string `json:"NotBefore"`   //     "20 Jan 2019 09:00:43 GMT"
-	Code        string `json:"Code"`        //     "system-reboot",
+	Code        string `json:"Code"`        //     "instance-reboot", "system-reboot", "system-maintenance", "instance-retirement", "instance-stop"
 	Description string `json:"Description"` //     "scheduled reboot",
 	EventId     string `json:"EventId"`     //     "instance-event-1d59937288b749b32",
 	NotAfter    string `json:"NotAfter"`    //     "20 Jan 2019 09:17:23 GMT",
-	State       string `json:"State"`       //     "active"
+	State       string `json:"State"`       //     "active", "completed", "canceled"
 }
 
 type fetched_metadata struct {
