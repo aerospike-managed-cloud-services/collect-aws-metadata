@@ -12,3 +12,6 @@ coverage.html
 # python cruft
 *.pyc
 /venv/
+
+# node
+node_modules

@@ -142,6 +142,17 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 Versioning].
 </details>
 
+### [1.1.0] - 2021-12-10
+
+#### Fixed
+
+- Renamed `instance` metric label to `cloud_instance` and other labels
+  similarly, to prevent Prometheus from clobbering them.
+
+#### Added
+
+- `event_state` metric label, `event_date` and `days_hence`, to make it easier
+  to produce a useful alert message.
 
 ### [1.0.0] - 2021-12-01
 
@@ -159,6 +170,7 @@ Versioning].
 
 
 [Unreleased]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.9.0...HEAD
+[1.1.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/compare/v0.0...v0.9.0
 [0.0]: https://github.com/aerospike-managed-cloud-services/collect-aws-metadata/releases/tag/v0.0
