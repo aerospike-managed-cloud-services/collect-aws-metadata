@@ -72,7 +72,7 @@ func printInfo(msg string) string {
 // create a textfile for Prometheus to read from the events, using the output argument (an open file)
 func writeMetrics(writer io.Writer, metadata *fetched_metadata, prefix string) error {
 	_, err := fmt.Fprintf(writer,
-		"%saws_maintenance_event_count{instance=\"%s\"} %d\n",
+		"%saws_maintenance_event_count{cloud_instance=\"%s\"} %d\n",
 		prefix,
 		metadata.instanceID,
 		len(metadata.events),
@@ -87,12 +87,15 @@ func writeMetrics(writer io.Writer, metadata *fetched_metadata, prefix string) e
 			return err
 		}
 		_, err = fmt.Fprintf(writer,
-			"%saws_maintenance_event{instance=\"%s\", code=\"%s\", id=\"%s\"} %d\n",
+			"%saws_maintenance_event{cloud_instance=\"%s\", event_code=\"%s\", event_id=\"%s\", event_state=\"%s\", event_date=\"%s\", days_hence=\"%d\"} %d\n",
 			prefix,
 			metadata.instanceID,
 			ev.Code,
 			ev.EventId,
-			evTime.Unix(),
+			ev.State,
+			evTime.Format("Mon 2006/01/02"), // formatted date of event, with weekday
+			int64(evTime.Sub(time.Now()).Hours()/24), // duration (in days) until event
+			evTime.Unix(), // timestamp
 		)
 		if err != nil {
 			return err

@@ -119,7 +119,7 @@ func Test_writeMetrics(t *testing.T) {
 				writer:   bytes.NewBufferString(""),
 				metadata: &fetched_metadata{},
 				prefix:   "hi_"},
-			want:    `(?s)^hi_aws_maintenance_event_count\{instance=""\} 0$`,
+			want:    `(?s)^hi_aws_maintenance_event_count\{cloud_instance=""\} 0$`,
 			wantErr: false,
 		},
 		{name: "2x events",
@@ -137,7 +137,7 @@ func Test_writeMetrics(t *testing.T) {
 							NotBefore: "20 Jan 2019 09:00:43 GMT",
 						}}},
 				prefix: ""},
-			want:    `(?s)instance="q-qqqqqq".*\b2\b.*\bid="ev-ent1".*\b1579510843\b.*\bid="ev-ent2".*\b1547974843$`,
+			want:    `(?s)cloud_instance="q-qqqqqq".*\b2\b.*\bevent_id="ev-ent1".*\b1579510843\b.*\bevent_id="ev-ent2".*\b1547974843$`,
 			wantErr: false,
 		},
 	}
