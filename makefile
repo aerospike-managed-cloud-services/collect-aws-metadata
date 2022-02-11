@@ -1,9 +1,11 @@
 #!/usr/bin/env make
 
-SHELL 	:= /usr/bin/bash
-PROG 	:= collect-aws-metadata
+SHELL   := /usr/bin/bash
+PROG    := collect-aws-metadata
 VERSION := $(shell tools/describe-version)
-TARBALL := $(PROG)-$(VERSION).tar.gz
+GOOS    := $(shell go env GOOS)
+GOARCH  := $(shell go env GOARCH)
+TARBALL := $(PROG)-$(VERSION)_$(GOOS)_$(GOARCH).tar.gz
 
 .PHONY: clean mock-service run-test test deps-test tarball
 

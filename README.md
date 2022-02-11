@@ -3,7 +3,7 @@ Reads AWS instance meta-data and creates a Prometheus .prom text file with upcom
 
 ## Installation
 
-1. Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z.tar.gz`
+1. Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z_linux_amd64.tar.gz`
 
 1. Unpack
 
