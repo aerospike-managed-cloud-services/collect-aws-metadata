@@ -1,9 +1,9 @@
 #!/usr/bin/env make
 
-SHELL 	:= /usr/bin/bash
+SHELL 	:= /opt/homebrew/bin/bash
 PROG 	:= collect-aws-metadata
-VERSION := $(shell tools/describe-version)
-TARBALL := $(PROG)-$(VERSION).tar.gz
+VERSION := v1.1.0
+TARBALL := $(PROG)-arm64-$(VERSION).tar.gz
 
 .PHONY: clean mock-service run-test test deps-test tarball
 
@@ -11,7 +11,7 @@ TARBALL := $(PROG)-$(VERSION).tar.gz
 all: $(PROG)
 
 $(PROG): collect.go go.mod go.sum
-	go build --ldflags="-X main.VERSION=$(VERSION)"
+	GOARCH=arm64 GOOS=linux go build --ldflags="-X main.VERSION=$(VERSION)"
 
 $(TARBALL): $(PROG)
 	tar cfz $@ $^ && tar tvfz $@
