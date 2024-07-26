@@ -89,6 +89,11 @@ WantedBy=timers.target
 
 ## Maintainer section: releasing
 
++By default the makefile builds a binary for your local environment. If the goal is to cross-compile for arm64 make sure to set GOOS and GOARCH correctly.
+  ```
+  make build GOARCH=arm64
+  ```
+
 To cut a release of this software, automated tests must pass. Check under `Actions` for the latest commit.
 
 #### Create an RC branch and test
