@@ -16,8 +16,8 @@ import (
 const DEFAULT_BASE_URL = "http://169.254.169.254"
 const DEFAULT_SCHEDULED_PATH = "/latest/meta-data/events/maintenance/scheduled"
 const DEFAULT_INSTANCE_ID_PATH = "/1.0/meta-data/instance-id"
-const MY_PROGRAM_NAME = "collect-aws-metadata"
 
+var MY_PROGRAM_NAME = "collect-aws-metadata"
 var VERSION string // to set this, build with --ldflags="-X main.VERSION=vx.y.z"
 
 // make these replaceable in a test
