@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-SHELL   := /usr/bin/bash
+SHELL   := /bin/bash
 PROG    := collect-aws-metadata
 VERSION := $(shell tools/describe-version)
 TARBALL := $(PROG)-$(VERSION)_$(GOOS)_$(GOARCH).tar.gz
