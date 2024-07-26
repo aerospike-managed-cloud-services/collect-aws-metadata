@@ -89,6 +89,7 @@ WantedBy=timers.target
 
 ## Maintainer section: releasing
 
+This repo supports builds for x86_64 and ARM64, use the corresponding make target to create the correct binary. 
 To cut a release of this software, automated tests must pass. Check under `Actions` for the latest commit.
 
 #### Create an RC branch and test
