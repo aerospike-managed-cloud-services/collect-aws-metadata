@@ -14,11 +14,11 @@ all: $(PROG_X86_64)
 
 $(PROG_X86_64): collect.go go.mod go.sum
 	go build --ldflags="-X main.VERSION=$(VERSION)" -o $@
-	mv $(PROG_X86_644) $(PROG) # Rename for testing
+	mv $@ $(PROG) # Renaming binary for testing and release
 
 $(PROG_ARM64): collect.go go.mod go.sum
 	GOARCH=arm64 GOOS=linux go build --ldflags="-X main.VERSION=$(VERSION)" -o $@
-	mv $(PROG_ARM64) $(PROG) # Rename for testing
+	mv $@ $(PROG) # Renaming binary for testing and release
 
 $(TARBALL_X86_64): $(PROG_X86_64)
 	tar cfz $@ $^ && tar tvfz $@
