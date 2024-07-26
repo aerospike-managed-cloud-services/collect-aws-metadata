@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 ver="$1"
 token="$2"
-tarball="collect-aws-metadata-$ver.tar.gz"
+tarball=(collect-aws-metadata-${ver}_*_*.tar.gz)
 
 gh auth login --with-token <<< "$token"
-gh release create -t "Release $ver" -n "## Release $ver" "$ver"  "$tarball"
+gh release create -t "Release $ver" -n "## Release $ver" "$ver"  "${tarball[0]}"

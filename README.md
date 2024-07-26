@@ -3,7 +3,7 @@ Reads AWS instance meta-data and creates a Prometheus .prom text file with upcom
 
 ## Installation
 
-1. Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z.tar.gz`
+1. Download the [latest release]. You most likely want the file named like: `collect-aws-metadata-vX.Y.Z_linux_amd64.tar.gz`
 
 1. Unpack
 
@@ -88,6 +88,11 @@ WantedBy=timers.target
 ----
 
 ## Maintainer section: releasing
+
++By default the makefile builds a binary for your local environment. If the goal is to cross-compile for arm64 make sure to set GOOS and GOARCH correctly.
+  ```
+  make build GOARCH=arm64
+  ```
 
 To cut a release of this software, automated tests must pass. Check under `Actions` for the latest commit.
 

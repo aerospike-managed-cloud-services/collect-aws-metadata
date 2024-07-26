@@ -1,9 +1,11 @@
 #!/usr/bin/env make
 
-SHELL 	:= /usr/bin/bash
-PROG 	:= collect-aws-metadata
+SHELL   := /usr/bin/bash
+PROG    := collect-aws-metadata
 VERSION := $(shell tools/describe-version)
-TARBALL := $(PROG)-$(VERSION).tar.gz
+TARBALL := $(PROG)-$(VERSION)_$(GOOS)_$(GOARCH).tar.gz
+GOOS    ?= $(shell go env GOOS)
+GOARCH  ?= $(shell go env GOARCH)
 
 .PHONY: clean mock-service run-test test deps-test tarball
 
@@ -11,7 +13,7 @@ TARBALL := $(PROG)-$(VERSION).tar.gz
 all: $(PROG)
 
 $(PROG): collect.go go.mod go.sum
-	go build --ldflags="-X main.VERSION=$(VERSION)"
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build --ldflags="-X main.VERSION=$(VERSION)"
 
 $(TARBALL): $(PROG)
 	tar cfz $@ $^ && tar tvfz $@
