@@ -37,7 +37,7 @@ run-test: collect.go go.mod
 		--textfiles-path=/tmp/collect-aws
 
 deps-test:
-	go install github.com/dave/courtney
+	go get -u github.com/dave/courtney
 
 test: deps-test
 	courtney .
