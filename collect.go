@@ -106,7 +106,7 @@ func writeMetrics(writer io.Writer, metadata *fetched_metadata, prefix string) e
 	return nil
 }
 
-// New function to fetch IMDSv2 token
+// Function to fetch IMDSv2 token
 func fetchToken(baseURL string) (string, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("PUT", baseURL+DEFAULT_TOKEN_PATH, nil)
