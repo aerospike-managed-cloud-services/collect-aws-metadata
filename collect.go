@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -16,6 +15,8 @@ import (
 const DEFAULT_BASE_URL = "http://169.254.169.254"
 const DEFAULT_SCHEDULED_PATH = "/latest/meta-data/events/maintenance/scheduled"
 const DEFAULT_INSTANCE_ID_PATH = "/1.0/meta-data/instance-id"
+const DEFAULT_TOKEN_PATH = "/latest/api/token"
+const TOKEN_TTL = "21600" // 6 hours in seconds
 const MY_PROGRAM_NAME = "collect-aws-metadata"
 
 var VERSION string // to set this, build with --ldflags="-X main.VERSION=vx.y.z"
@@ -26,6 +27,7 @@ var osExit func(code int) = os.Exit
 
 type collect_options struct {
 	baseURL, metricPrefix, textfilesPath string
+	token                                string
 }
 
 type maintenance_event struct {
@@ -104,10 +106,53 @@ func writeMetrics(writer io.Writer, metadata *fetched_metadata, prefix string) e
 	return nil
 }
 
-// fetch `url` with HTTP GET and return the body
-// In this implementation, we also treat 4** and 5** responses as errors
-func fetchURL(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+// New function to fetch IMDSv2 token
+func fetchToken(baseURL string) (string, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("PUT", baseURL+DEFAULT_TOKEN_PATH, nil)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("X-aws-ec2-metadata-token-ttl-seconds", TOKEN_TTL)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// If we get a 403 or 404, the instance might be using IMDSv1
+	if resp.StatusCode == 403 || resp.StatusCode == 404 {
+		return "", nil
+	}
+
+	if resp.StatusCode != 200 {
+		return "", &HTTPErrorStatusCode{url: baseURL + DEFAULT_TOKEN_PATH, code: resp.StatusCode, message: resp.Status}
+	}
+
+	token, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(token), nil
+}
+
+// Update fetchURL to use token if available
+func fetchURL(url string, token string) ([]byte, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add token header if token is available
+	if token != "" {
+		req.Header.Set("X-aws-ec2-metadata-token", token)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -120,25 +165,31 @@ func fetchURL(url string) ([]byte, error) {
 		defer resp.Body.Close()
 	}
 
-	body, _ := ioutil.ReadAll(resp.Body)
-
+	body, _ := io.ReadAll(resp.Body)
 	return body, nil
 }
 
-// fetch instance metadata from the well-known AWS URLs and configured baseURL
+// Update fetchMetadata to use token
 func fetchMetadata(opt *collect_options) (*fetched_metadata, error) {
 	ret := &fetched_metadata{}
 	eventsURL := opt.baseURL + DEFAULT_SCHEDULED_PATH
 	instanceURL := opt.baseURL + DEFAULT_INSTANCE_ID_PATH
 
-	instance, err := fetchURL(instanceURL)
+	// Try to fetch token first (for IMDSv2)
+	token, err := fetchToken(opt.baseURL)
+	if err != nil {
+		return nil, err
+	}
+	opt.token = token
+
+	instance, err := fetchURL(instanceURL, opt.token)
 	if err != nil {
 		return nil, err
 	}
 
 	ret.instanceID = string(instance)
 
-	body, err := fetchURL(eventsURL)
+	body, err := fetchURL(eventsURL, opt.token)
 	if err != nil {
 		return nil, err
 	}

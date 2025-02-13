@@ -30,6 +30,7 @@ mock-service:
 			--reload
 
 run-test: collect.go go.mod
+	mkdir -p /tmp/collect-aws
 	go run . \
 		--base-url=http://localhost:8000 \
 		--metric-prefix=amcs_ \

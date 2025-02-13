@@ -160,6 +160,13 @@ func Test_writeMetrics(t *testing.T) {
 
 func Test_fetchURL(t *testing.T) {
 	srv1 := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Check token if provided
+		if token := r.Header.Get("X-aws-ec2-metadata-token"); token != "" {
+			if token != "test-token" {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+		}
 		fmt.Fprintf(w, "q-qqqqqq")
 	}))
 	defer srv1.Close()
@@ -169,7 +176,8 @@ func Test_fetchURL(t *testing.T) {
 	defer srvBad.Close()
 	qs := "q-qqqqqq"
 	type args struct {
-		url string
+		url   string
+		token string
 	}
 	tests := []struct {
 		name    string
@@ -177,8 +185,19 @@ func Test_fetchURL(t *testing.T) {
 		want    *string
 		wantErr bool
 	}{
-		{name: "instance-id returns an id",
-			args:    args{url: srv1.URL + "/instance-id"},
+		{name: "instance-id returns an id with token",
+			args: args{
+				url:   srv1.URL + "/instance-id",
+				token: "test-token",
+			},
+			want:    &qs,
+			wantErr: false,
+		},
+		{name: "instance-id returns an id without token",
+			args: args{
+				url:   srv1.URL + "/instance-id",
+				token: "",
+			},
 			want:    &qs,
 			wantErr: false,
 		},
@@ -195,7 +214,7 @@ func Test_fetchURL(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := fetchURL(tt.args.url)
+			got, err := fetchURL(tt.args.url, tt.args.token)
 			strgot := strings.TrimSpace(string(got))
 			if tt.want != nil && !reflect.DeepEqual(strgot, *tt.want) {
 				t.Errorf("fetchURL(%s) = '%v', want '%v'", tt.args.url, strgot, *tt.want)
@@ -218,8 +237,34 @@ type writerFunc func(w http.ResponseWriter)
 //
 // Returns the server with these handlers bound to write responses
 func helpMakeAServer(fnID writerFunc, fnJSON writerFunc) *httptest.Server {
+	// Track if we've received a valid token
+	var validToken string
+
 	return httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			// Handle token requests
+			if strings.HasSuffix(r.URL.String(), "/latest/api/token") {
+				if r.Method != "PUT" {
+					http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+					return
+				}
+				ttl := r.Header.Get("X-aws-ec2-metadata-token-ttl-seconds")
+				if ttl == "" {
+					http.Error(w, "Missing TTL header", http.StatusBadRequest)
+					return
+				}
+				validToken = "test-token-" + ttl
+				w.Write([]byte(validToken))
+				return
+			}
+
+			// For other endpoints, check token if provided
+			token := r.Header.Get("X-aws-ec2-metadata-token")
+			if token != "" && token != validToken {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return
+			}
+
 			if strings.HasSuffix(r.URL.String(), "/instance-id") {
 				fnID(w)
 			} else {
@@ -447,6 +492,63 @@ func TestHTTPErrorStatusCode_Error(t *testing.T) {
 			}
 			if got := e.Error(); got != tt.want {
 				t.Errorf("HTTPErrorStatusCode.Error() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// Add test for fetchToken
+func Test_fetchToken(t *testing.T) {
+	tests := []struct {
+		name    string
+		server  *httptest.Server
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "successful token fetch",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != "PUT" {
+					http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+					return
+				}
+				if ttl := r.Header.Get("X-aws-ec2-metadata-token-ttl-seconds"); ttl != TOKEN_TTL {
+					http.Error(w, "Invalid TTL", http.StatusBadRequest)
+					return
+				}
+				w.Write([]byte("test-token"))
+			})),
+			want:    "test-token",
+			wantErr: false,
+		},
+		{
+			name: "IMDSv1 fallback (404)",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not found", http.StatusNotFound)
+			})),
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "server error",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Server error", http.StatusInternalServerError)
+			})),
+			want:    "",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer tt.server.Close()
+			got, err := fetchToken(tt.server.URL)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("fetchToken() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("fetchToken() = %v, want %v", got, tt.want)
 			}
 		})
 	}
