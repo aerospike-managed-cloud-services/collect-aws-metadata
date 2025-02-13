@@ -30,13 +30,14 @@ mock-service:
 			--reload
 
 run-test: collect.go go.mod
+	mkdir -p /tmp/collect-aws
 	go run . \
 		--base-url=http://localhost:8000 \
 		--metric-prefix=amcs_ \
 		--textfiles-path=/tmp/collect-aws
 
 deps-test:
-	go install github.com/dave/courtney
+	go install github.com/dave/courtney@latest
 
 test: deps-test
 	courtney .
