@@ -147,6 +147,15 @@ The format is based on [Keep a Changelog], and this project adheres to [Semantic
 Versioning].
 </details>
 
+### [1.2.0] - 2025-02-15
+
+#### Added
+
+- Added functionality to support the AWS EC2 IMDSv2 endpoint.
+- Updated Go version to 1.22.
+- Added tests for the new functionality.
+
+
 ### [1.1.0] - 2021-12-10
 
 #### Fixed
